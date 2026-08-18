@@ -1,0 +1,84 @@
+name: Release
+
+# Regenerates the tool-specific files with ruler and publishes them as one
+# .zip per AI tool. A release is cut only when the version in package.json
+# names a tag that does not exist yet -- pushes that do not bump the version
+# are a no-op.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write # create the tag and the release
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      exists: ${{ steps.version.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve the version and look for its tag
+        id: version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+          # Probe the remote rather than fetching every tag.
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$tag already exists - skipping. Bump the version in package.json to cut a new release."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$tag does not exist yet - building a release."
+          fi
+
+  release:
+    name: Build and publish
+    needs: check
+    if: needs.check.outputs.exists == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Must come before setup-node so its pnpm cache can find the binary.
+      # The version comes from `packageManager` in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # ruler requires ^20.19.0 || ^22.12.0 || >=23
+          node-version: '22'
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generate the tool-specific files
+        run: pnpm run ruler:apply
+
+      - name: Build the release bundles
+        run: python3 scripts/build_release_bundles.py "${{ needs.check.outputs.version }}"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.check.outputs.tag }}
+        run: |
+          # `gh release create` tags $GITHUB_SHA as a side effect.
+          gh release create "$TAG" \
+            --title "QRSPI $TAG" \
+            --notes-file dist/RELEASE_NOTES.md \
+            --target "$GITHUB_SHA" \
+            dist/*.zip dist/*.sha256 dist/SHA256SUMS.txt

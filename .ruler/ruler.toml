@@ -1,0 +1,14 @@
+# Ruler Configuration File
+# See https://ai.intellectronica.net/ruler for documentation.
+
+# Tools this repo targets. Widen by adding identifiers here; run `ruler apply --agents <list>`
+# to override for a single run. Omit the line entirely to target every agent ruler supports.
+default_agents = ["claude", "cursor", "copilot", "codex", "gemini-cli"]
+
+# Subagent propagation from .ruler/agents/ into each tool's native location.
+# Ruler defaults this OFF, so it must be set explicitly.
+# NOTE: this [agents] table is distinct from [agents.<name>], which toggles a single coding tool.
+[agents]
+enabled = true
+
+# Skills in .ruler/skills/ are propagated by default and need no configuration.

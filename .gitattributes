@@ -1,0 +1,5 @@
+# Keep the working tree LF on every platform. The release archives are hashed,
+# and a CRLF checkout would silently change every SHA256 relative to CI.
+* text=auto eol=lf
+
+*.zip binary
