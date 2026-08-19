@@ -79,14 +79,25 @@ regenerates the tool files, packages them, and publishes a release tagged `v<ver
 `package.json`. If that tag already exists the run is a no-op — **bump the version in
 `package.json` to cut a release**.
 
+The release notes open with a **What's Changed** section listing the PRs merged since the previous
+release. CI asks GitHub to generate it (`gh api .../releases/generate-notes`, anchored on the last
+published release, since the new tag does not exist until the release is created) and passes the
+result to the build script as `--changelog`. Because it comes from GitHub, PRs are listed however
+they were merged — squash, rebase or merge commit — so **the PR title is what readers see**. If the
+API call fails the release still ships, with a warning and without the section.
+
 To reproduce the archives locally:
 
 ```bash
 pnpm run ruler:apply && python3 scripts/build_release_bundles.py 1.0.0
 ```
 
+There is no release to compare a local build against, so it omits `--changelog` and renders the
+notes without the **What's Changed** section; everything else is identical to what CI publishes.
+
 Archives are deterministic (sorted entries, fixed timestamps and modes), so rebuilding the same
-content always produces byte-identical archives. Output lands in `dist/`, which is gitignored.
+content always produces byte-identical archives — the changelog only affects `RELEASE_NOTES.md`.
+Output lands in `dist/`, which is gitignored.
 
 ## Pull requests
 
