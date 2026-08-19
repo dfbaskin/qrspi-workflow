@@ -72,7 +72,7 @@ Read `<artifact-dir>/structure.md`, `<artifact-dir>/design.md`, `<artifact-dir>/
 ## Output
 
 - File written: `thoughts/qrspi/<id>/plan.md`
-- Tell the user: "Next: invoke the `qrspi-6-worktree` skill with `thoughts/qrspi/<id>/` to set up an isolated worktree, or `qrspi-7-implement` to implement in the current tree (in most tools, `/qrspi-6-worktree thoughts/qrspi/<id>/`)."
+- Tell the user: "Next: **start a fresh context** — `/clear` in Claude Code, a new chat or session in other tools — then invoke the `qrspi-6-worktree` skill with `thoughts/qrspi/<id>/` to set up an isolated worktree, or `qrspi-7-implement` to implement in the current tree (in most tools, `/qrspi-6-worktree thoughts/qrspi/<id>/`). The artifacts are the handoff: that phase reads what it needs from disk, so carrying this session forward only costs context."
 
 ## Rules
 
