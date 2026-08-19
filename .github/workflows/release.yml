@@ -81,4 +81,4 @@ jobs:
             --title "QRSPI $TAG" \
             --notes-file dist/RELEASE_NOTES.md \
             --target "$GITHUB_SHA" \
-            dist/*.zip dist/*.sha256 dist/SHA256SUMS.txt
+            dist/*.zip dist/SHA256SUMS.txt
