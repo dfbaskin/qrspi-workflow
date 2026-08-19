@@ -1,6 +1,6 @@
 {
   "name": "qrspi-workflow",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Cross-tool implementation of QRSPI AI coding workflow.",
   "scripts": {
     "ruler:apply": "ruler apply",

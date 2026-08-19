@@ -8,6 +8,19 @@ disable-model-invocation: true
 
 Create a git worktree so implementation happens on an isolated branch without affecting your main working tree.
 
+## When to Use This Phase
+
+A worktree is worth creating when:
+
+- **Parallel work** — more than one implementation in flight at once, each in its own session.
+- **Unattended runs** — the agent builds and tests without blocking the tree you are reading and editing in.
+- **A dirty main tree** — uncommitted work you would rather not stash or disturb.
+- **A disposable blast radius** — `git worktree remove` throws the whole attempt away without touching the tree you live in.
+
+Otherwise skip this phase and implement on a plain feature branch in the current tree. A fresh worktree starts without any ignored files: no installed dependencies, no `.env` or equivalent secrets, no build cache, no generated agent instruction files, and any IDE, container, or virtualenv config pointing at the old absolute path. Steps 5 and 6 below exist to pay that cost; if none of the reasons above apply, do not incur it.
+
+Skipping is safe. The `qrspi-7-implement` skill runs its own branch preflight and will not commit onto the default branch without asking.
+
 ## Input
 
 **Resolve the artifact directory.** If a path was provided when this skill was invoked, use it. Otherwise list `thoughts/qrspi/*/`, pick the most recently modified, state which one you picked, and confirm before proceeding.

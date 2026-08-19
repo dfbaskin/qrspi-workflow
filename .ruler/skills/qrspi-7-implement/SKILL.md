@@ -20,7 +20,7 @@ Read `<artifact-dir>/plan.md`. That is your primary working document.
 
 1. **Read `plan.md` fully.** Check for existing checkmarks (`- [x]`) — if some phases are already complete, pick up from the first unchecked item.
 
-2. **Branch preflight, before touching any code.** Determine the current branch and the repo's default branch. If you are on the default branch, stop and ask the user whether to create a feature branch or proceed anyway — this phase commits after every slice, and those commits should not land on the default branch by accident. If the `qrspi-6-worktree` skill was run, you are already on the right branch and this check passes silently.
+2. **Branch preflight, before touching any code.** Determine the current branch and the repo's default branch. If you are on the default branch, stop and ask the user whether to create a feature branch or proceed anyway — this phase commits after every slice, and those commits should not land on the default branch by accident. Derive the proposed branch name from the artifact directory name, the same way the `qrspi-6-worktree` skill does (e.g. `ENG-1234-description` or `2026-03-29-new-feature`), so both routes produce the same name for a given task; propose it and let the user override. If the `qrspi-6-worktree` skill was run, you are already on the right branch and this check passes silently.
 
 3. **Read all files referenced in the current phase** before making changes. Understand the code you're modifying.
 
