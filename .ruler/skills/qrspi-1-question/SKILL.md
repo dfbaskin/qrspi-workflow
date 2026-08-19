@@ -67,7 +67,7 @@ The user provides a task description, ticket file path, or issue reference — e
 
 - Directory created: `thoughts/qrspi/<id>/`
 - Files written: `thoughts/qrspi/<id>/task.md` and `thoughts/qrspi/<id>/questions.md`
-- Tell the user: "Next: invoke the `qrspi-2-research` skill with `thoughts/qrspi/<id>/` (in most tools, `/qrspi-2-research thoughts/qrspi/<id>/`)."
+- Tell the user: "Next: **start a fresh context** — `/clear` in Claude Code, a new chat or session in other tools — then invoke the `qrspi-2-research` skill with `thoughts/qrspi/<id>/` (in most tools, `/qrspi-2-research thoughts/qrspi/<id>/`). Research must not inherit this session: it answers the questions blind, and knowing the goal is the one thing it is designed to avoid."
 
 ## Rules
 

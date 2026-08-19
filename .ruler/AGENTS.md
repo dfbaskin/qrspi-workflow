@@ -34,3 +34,9 @@ commits stage source files by name, never the whole tree.
 
 These are explicit, user-invoked phases. Do not start one on your own initiative, and do not run
 ahead to the next phase after finishing one — report the artifact and stop.
+
+Each phase runs in its own fresh context. Start a new one (`/clear` in Claude Code, a new chat or
+session in other tools) before invoking the next phase, so it reads its inputs from the artifacts
+rather than inheriting the previous session. Writing the artifact is only half of the compaction;
+discarding the context that produced it is the other half. Phase 2 depends on this most — it must
+not know what is being built.

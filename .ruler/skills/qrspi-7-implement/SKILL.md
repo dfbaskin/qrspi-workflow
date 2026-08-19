@@ -74,7 +74,7 @@ If you're starting fresh in a new context window:
 - Code changes implemented according to the plan
 - `plan.md` updated with checked verification items
 - One commit per completed phase
-- Tell the user: "Next: invoke the `qrspi-8-pr` skill with `thoughts/qrspi/<id>/` (in most tools, `/qrspi-8-pr thoughts/qrspi/<id>/`)."
+- Tell the user: "Next: **start a fresh context** — `/clear` in Claude Code, a new chat or session in other tools — then invoke the `qrspi-8-pr` skill with `thoughts/qrspi/<id>/` (in most tools, `/qrspi-8-pr thoughts/qrspi/<id>/`). The artifacts are the handoff: that phase reads what it needs from disk, so carrying this session forward only costs context."
 
 ## Rules
 

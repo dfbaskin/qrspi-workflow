@@ -11,11 +11,13 @@ This phase is reasoning-heavy. Use your most capable model; if your tool lets yo
 
 ## Input
 
+**Check the context first.** This phase only works in a context that knows nothing about the task. If this session already contains the task description, a ticket, phase-1 exploration, or any discussion of what is being built, **stop**: tell the user to start a fresh context (`/clear` in Claude Code, a new chat or session in other tools) and re-invoke this skill. Do not proceed and do not try to compensate — findings produced while knowing the goal are the exact failure this phase exists to prevent.
+
 **Resolve the artifact directory.** If a path was provided when this skill was invoked, use it. Otherwise list `thoughts/qrspi/*/`, pick the most recently modified, state which one you picked, and confirm before proceeding. If none exist, tell the user to run the QRSPI question phase first.
 
 Then read exactly one file: `<artifact-dir>/questions.md`.
 
-**Do NOT list, glob, or open anything else in the artifact directory** — `task.md` lives there, and reading it destroys the objectivity this phase exists to provide. Do not ask the user what they are building. If you already know, answer the questions as written anyway.
+**Do NOT list, glob, or open anything else in the artifact directory** — `task.md` lives there, and reading it destroys the objectivity this phase exists to provide. Do not ask the user what they are building.
 
 ## Process
 
@@ -67,7 +69,7 @@ Then read exactly one file: `<artifact-dir>/questions.md`.
 ## Output
 
 - File written: `thoughts/qrspi/<id>/research.md`
-- Tell the user: "Next: invoke the `qrspi-3-design` skill with `thoughts/qrspi/<id>/` (in most tools, `/qrspi-3-design thoughts/qrspi/<id>/`)."
+- Tell the user: "Next: **start a fresh context** — `/clear` in Claude Code, a new chat or session in other tools — then invoke the `qrspi-3-design` skill with `thoughts/qrspi/<id>/` (in most tools, `/qrspi-3-design thoughts/qrspi/<id>/`). The artifacts are the handoff: that phase reads what it needs from disk, so carrying this session forward only costs context."
 
 ## Rules
 
@@ -75,6 +77,7 @@ Then read exactly one file: `<artifact-dir>/questions.md`.
 - Do NOT suggest improvements, optimizations, or refactoring.
 - Do NOT propose implementation approaches or solutions.
 - Do NOT read `task.md`, any ticket, task description, or design document — only `questions.md`.
+- If this session already knows what is being built, stop and ask for a fresh context. Do not proceed anyway.
 - Every finding must include a `file:line` reference.
 - If a question can't be answered from the codebase, say so clearly.
 - Aim for ~300 lines total. Dense references over lengthy prose.

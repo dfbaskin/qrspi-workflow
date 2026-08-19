@@ -79,7 +79,7 @@ Read `<artifact-dir>/design.md` and `<artifact-dir>/research.md`.
 ## Output
 
 - File written: `thoughts/qrspi/<id>/structure.md`
-- Tell the user: "Next: invoke the `qrspi-5-plan` skill with `thoughts/qrspi/<id>/` (in most tools, `/qrspi-5-plan thoughts/qrspi/<id>/`)."
+- Tell the user: "Next: **start a fresh context** — `/clear` in Claude Code, a new chat or session in other tools — then invoke the `qrspi-5-plan` skill with `thoughts/qrspi/<id>/` (in most tools, `/qrspi-5-plan thoughts/qrspi/<id>/`). The artifacts are the handoff: that phase reads what it needs from disk, so carrying this session forward only costs context."
 
 ## Rules
 
