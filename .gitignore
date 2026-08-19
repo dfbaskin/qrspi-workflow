@@ -2,6 +2,8 @@ node_modules/
 
 dist/
 
+thoughts/
+
 .DS_Store
 Thumbs.db
 
