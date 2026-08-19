@@ -7,14 +7,21 @@
 Writes into dist/: one archive per tool, a combined SHA256SUMS.txt, and
 RELEASE_NOTES.md.
 
+`--changelog FILE` splices that file into the notes as the "What's Changed"
+section. CI passes the PRs merged since the last release; local builds have no
+release to compare against and omit it.
+
 Archives are deterministic -- entries are sorted, and their timestamps, modes
 and host system are fixed -- so rebuilding the same content produces
-byte-identical archives. Text output is written as bytes with LF endings, so a
-SHA256SUMS.txt produced on Windows still verifies with `sha256sum -c`.
+byte-identical archives. That guarantee covers the archives only: the notes
+vary with --changelog, by design. Text output is written as bytes with LF
+endings, so a SHA256SUMS.txt produced on Windows still verifies with
+`sha256sum -c`.
 """
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import sys
 import zipfile
@@ -106,7 +113,18 @@ def clear_dist() -> None:
     DIST.mkdir(exist_ok=True)
 
 
-def render_notes(version: str, assets: list[dict]) -> str:
+def render_changelog(text: str | None) -> str:
+    """The "What's Changed" block, or nothing at all when we have no changelog.
+
+    GitHub's generated notes already open with their own `## What's Changed`
+    heading and close with a compare link, so this only fixes up the spacing
+    that separates the block from the prose around it.
+    """
+    return f"{text.strip()}\n\n" if text and text.strip() else ""
+
+
+def render_notes(version: str, assets: list[dict], changelog: str | None = None) -> str:
+    changelog_block = render_changelog(changelog)
     asset_rows = "\n".join(
         f"| `{a['name']}` | {a['label']} | {a['size']} |" for a in assets
     )
@@ -120,7 +138,7 @@ def render_notes(version: str, assets: list[dict]) -> str:
 **QRSPI** is a staged workflow for non-trivial coding tasks: eight user-invoked phases,
 each writing one artifact that the next phase reads.
 
-Each archive below holds the files for one AI coding tool, with paths relative to your
+{changelog_block}Each archive below holds the files for one AI coding tool, with paths relative to your
 repository root. Download the one you want and unzip it in place:
 
 ```bash
@@ -157,10 +175,35 @@ To regenerate them yourself, clone the repo and run `pnpm install && pnpm run ru
 """
 
 
+def read_changelog(path: Path | None) -> str | None:
+    """The changelog text, or None if we were not given a usable one.
+
+    A missing or empty file is not an error: a release that cannot reach the
+    GitHub API is still worth shipping, just without the section.
+    """
+    if path is None:
+        return None
+    if not path.is_file():
+        print(f"==> No changelog at {path} - notes will omit it", file=sys.stderr)
+        return None
+    return path.read_text(encoding="utf-8") or None
+
+
 def main() -> None:
-    if len(sys.argv) != 2:
-        sys.exit(f"usage: {Path(sys.argv[0]).name} <version>")
-    version = sys.argv[1]
+    parser = argparse.ArgumentParser(
+        description="Package the output of `ruler apply` into one .zip per AI tool."
+    )
+    parser.add_argument("version", help="version to stamp into the archive names")
+    parser.add_argument(
+        "--changelog",
+        type=Path,
+        metavar="FILE",
+        help="markdown file to splice into the notes as the \"What's Changed\" "
+        "section; omit it for local builds",
+    )
+    options = parser.parse_args()
+    version = options.version
+    changelog = read_changelog(options.changelog)
 
     print("==> Verifying ruler output")
     verify_ruler_output()
@@ -190,7 +233,7 @@ def main() -> None:
         )
 
     write_text(DIST / "SHA256SUMS.txt", "\n".join(checksums) + "\n")
-    write_text(DIST / "RELEASE_NOTES.md", render_notes(version, assets))
+    write_text(DIST / "RELEASE_NOTES.md", render_notes(version, assets, changelog))
 
     print("\n==> Done. dist/ contains:")
     for item in sorted(DIST.iterdir()):

@@ -1,9 +1,9 @@
 name: Release
 
 # Regenerates the tool-specific files with ruler and publishes them as one
-# .zip per AI tool. A release is cut only when the version in package.json
-# names a tag that does not exist yet -- pushes that do not bump the version
-# are a no-op.
+# .zip per AI tool, under notes listing the PRs merged since the last release.
+# A release is cut only when the version in package.json names a tag that does
+# not exist yet -- pushes that do not bump the version are a no-op.
 
 on:
   push:
@@ -68,8 +68,40 @@ jobs:
       - name: Generate the tool-specific files
         run: pnpm run ruler:apply
 
+      - name: Collect the PRs merged since the last release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.check.outputs.tag }}
+          CHANGELOG: ${{ runner.temp }}/changelog.md
+        run: |
+          # $TAG does not exist yet -- `gh release create` makes it below -- so
+          # anchor on the last *published* release instead. On the very first
+          # release there is nothing to compare against and GitHub covers all
+          # of history.
+          previous=$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name 2>/dev/null || true)
+
+          args=(-f "tag_name=$TAG" -f "target_commitish=$GITHUB_SHA")
+          if [ -n "$previous" ]; then
+            args+=(-f "previous_tag_name=$previous")
+            echo "::notice::Listing the PRs merged since $previous."
+          else
+            echo "::notice::No previous release found - the notes will cover the full history."
+          fi
+
+          # Staged in the runner temp dir, not dist/: the build script clears
+          # dist/ before it renders the notes.
+          if ! gh api --method POST "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
+                 "${args[@]}" --jq .body > "$CHANGELOG"; then
+            # Losing the changelog is not worth losing the archives over.
+            echo "::warning::Could not generate the changelog - publishing without it."
+            : > "$CHANGELOG"
+          fi
+
       - name: Build the release bundles
-        run: python3 scripts/build_release_bundles.py "${{ needs.check.outputs.version }}"
+        run: |
+          python3 scripts/build_release_bundles.py \
+            "${{ needs.check.outputs.version }}" \
+            --changelog "${{ runner.temp }}/changelog.md"
 
       - name: Publish the release
         env:
