@@ -31,11 +31,11 @@ hand-authored source in `.ruler/`.
 
 ## Install
 
-Grab the archive for your tool from the [latest release](../../releases/latest), verify it, and
-unzip it at the root of your repository:
+Grab the archive for your tool from the [latest release](../../releases/latest) and unzip it at the
+root of your repository:
 
 ```bash
-sha256sum -c qrspi-claude-1.0.0.zip.sha256 && unzip -o qrspi-claude-1.0.0.zip
+unzip -o qrspi-claude-1.0.0.zip
 ```
 
 | Bundle | Tool | Contents |

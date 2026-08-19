@@ -68,9 +68,9 @@ If you add or remove a phase, update the table in [`README.md`](README.md), the 
 
 ## Line endings
 
-[`.gitattributes`](.gitattributes) forces LF in the working tree on every platform. Release archives
-are hashed, and a CRLF checkout would silently change every SHA256 relative to CI. Do not override
-this locally.
+[`.gitattributes`](.gitattributes) forces LF in the working tree on every platform. The prompt files
+are shipped verbatim inside the release archives, so a CRLF checkout would hand users different bytes
+than a CI build produces. Do not override this locally.
 
 ## Releases
 
@@ -85,8 +85,8 @@ To reproduce the archives locally:
 pnpm run ruler:apply && python3 scripts/build_release_bundles.py 1.0.0
 ```
 
-Archives are deterministic (sorted entries, fixed timestamps and modes), so the same content always
-produces the same SHA256. Output lands in `dist/`, which is gitignored.
+Archives are deterministic (sorted entries, fixed timestamps and modes), so rebuilding the same
+content always produces byte-identical archives. Output lands in `dist/`, which is gitignored.
 
 ## Pull requests
 

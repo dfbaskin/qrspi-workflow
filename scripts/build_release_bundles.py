@@ -4,13 +4,13 @@
     pnpm run ruler:apply
     python3 scripts/build_release_bundles.py 1.0.0
 
-Writes into dist/: one archive per tool, a .sha256 beside each, a combined
-SHA256SUMS.txt, and RELEASE_NOTES.md.
+Writes into dist/: one archive per tool, a combined SHA256SUMS.txt, and
+RELEASE_NOTES.md.
 
 Archives are deterministic -- entries are sorted, and their timestamps, modes
-and host system are fixed -- so identical content always hashes identically.
-Text output is written as bytes with LF endings, so a SHA256SUMS.txt produced
-on Windows still verifies with `sha256sum -c`.
+and host system are fixed -- so rebuilding the same content produces
+byte-identical archives. Text output is written as bytes with LF endings, so a
+SHA256SUMS.txt produced on Windows still verifies with `sha256sum -c`.
 """
 
 from __future__ import annotations
@@ -108,7 +108,7 @@ def clear_dist() -> None:
 
 def render_notes(version: str, assets: list[dict]) -> str:
     asset_rows = "\n".join(
-        f"| `{a['name']}` | {a['label']} | {a['size']} | `{a['sha256']}` |" for a in assets
+        f"| `{a['name']}` | {a['label']} | {a['size']} |" for a in assets
     )
     content_rows = "\n".join(
         "| `{name}` | {paths} |".format(
@@ -121,7 +121,7 @@ def render_notes(version: str, assets: list[dict]) -> str:
 each writing one artifact that the next phase reads.
 
 Each archive below holds the files for one AI coding tool, with paths relative to your
-repository root. Download the one you want, verify it, and unzip it in place:
+repository root. Download the one you want and unzip it in place:
 
 ```bash
 unzip -o qrspi-claude-{version}.zip
@@ -129,12 +129,11 @@ unzip -o qrspi-claude-{version}.zip
 
 ## Assets
 
-| File | Tool | Size | SHA256 |
-|---|---|---|---|
+| File | Tool | Size |
+|---|---|---|
 {asset_rows}
 
-`SHA256SUMS.txt` covers every archive, and each one also ships a companion `.sha256`.
-To verify:
+`SHA256SUMS.txt` covers every archive, if you want to check a download:
 
 ```bash
 sha256sum -c SHA256SUMS.txt
@@ -178,9 +177,7 @@ def main() -> None:
         payload = target.read_bytes()
         digest = hashlib.sha256(payload).hexdigest()
         # Two spaces between hash and name: the format `sha256sum -c` expects.
-        line = f"{digest}  {name}"
-        write_text(DIST / f"{name}.sha256", line + "\n")
-        checksums.append(line)
+        checksums.append(f"{digest}  {name}")
 
         print(f"==> {name}: {len(files)} files, {human_size(len(payload))}")
         assets.append(
@@ -189,7 +186,6 @@ def main() -> None:
                 "label": label,
                 "paths": paths,
                 "size": human_size(len(payload)),
-                "sha256": digest,
             }
         )
 
